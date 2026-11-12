@@ -29,7 +29,6 @@ jobs:
         shell: bash
         run: |
           set -e
-
           mkdir -p app/src/main/java/com/jipin/shanghaoqi
 
           cat > settings.gradle <<'EOF'
@@ -65,13 +64,12 @@ jobs:
           android {
               namespace 'com.jipin.shanghaoqi'
               compileSdk 35
-
               defaultConfig {
                   applicationId 'com.jipin.shanghaoqi'
                   minSdk 23
                   targetSdk 35
-                  versionCode 1
-                  versionName '1.0'
+                  versionCode 2
+                  versionName '2.0'
               }
           }
           EOF
@@ -100,62 +98,168 @@ jobs:
           import android.app.Activity;
           import android.os.Bundle;
           import android.graphics.Color;
+          import android.graphics.Typeface;
+          import android.graphics.drawable.GradientDrawable;
           import android.view.Gravity;
-          import android.widget.LinearLayout;
-          import android.widget.TextView;
+          import android.view.View;
           import android.widget.Button;
+          import android.widget.LinearLayout;
+          import android.widget.ScrollView;
+          import android.widget.TextView;
+          import android.widget.Toast;
 
           public class MainActivity extends Activity {
+              private TextView rootValue;
+
+              private GradientDrawable shape(int color, int radius) {
+                  GradientDrawable d = new GradientDrawable();
+                  d.setColor(color);
+                  d.setCornerRadius(radius);
+                  return d;
+              }
+
+              private TextView text(String value, int size, int color, boolean bold) {
+                  TextView t = new TextView(this);
+                  t.setText(value);
+                  t.setTextSize(size);
+                  t.setTextColor(color);
+                  if (bold) t.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+                  return t;
+              }
+
+              private Button makeButton(String label) {
+                  Button b = new Button(this);
+                  b.setText(label);
+                  b.setAllCaps(false);
+                  b.setTextSize(15);
+                  return b;
+              }
+
               @Override
               protected void onCreate(Bundle savedInstanceState) {
                   super.onCreate(savedInstanceState);
 
-                  LinearLayout layout = new LinearLayout(this);
-                  layout.setOrientation(LinearLayout.VERTICAL);
-                  layout.setGravity(Gravity.CENTER);
-                  layout.setPadding(32, 32, 32, 32);
-                  layout.setBackgroundColor(Color.rgb(245, 245, 245));
+                  ScrollView scroll = new ScrollView(this);
+                  scroll.setBackgroundColor(Color.rgb(12, 18, 32));
 
-                  TextView title = new TextView(this);
-                  title.setText("极品上号器");
-                  title.setTextSize(28);
-                  title.setTextColor(Color.BLACK);
-                  title.setGravity(Gravity.CENTER);
+                  LinearLayout page = new LinearLayout(this);
+                  page.setOrientation(LinearLayout.VERTICAL);
+                  page.setPadding(22, 28, 22, 28);
+                  scroll.addView(page);
 
-                  TextView info = new TextView(this);
-                  info.setText("官方授权登录工具\n\n请使用游戏官方提供的扫码或授权登录方式。");
-                  info.setTextSize(16);
-                  info.setTextColor(Color.DKGRAY);
-                  info.setGravity(Gravity.CENTER);
-                  info.setPadding(0, 40, 0, 40);
+                  TextView brand = text("极品上号器", 29, Color.WHITE, true);
+                  page.addView(brand);
 
-                  Button button = new Button(this);
-                  button.setText("检测 Root 状态");
-                  button.setOnClickListener(v -> {
-                      new Thread(() -> {
-                          String result;
-                          try {
-                              Process p = Runtime.getRuntime().exec(
-                                  new String[]{"su", "-c", "id"}
-                              );
-                              int code = p.waitFor();
-                              result = code == 0
-                                  ? "检测到 Root 授权"
-                                  : "未获得 Root 授权";
-                          } catch (Exception e) {
-                              result = "未检测到 Root 或无法执行检测";
+                  TextView subtitle = text("JI PIN  ·  安全授权工具", 13,
+                      Color.rgb(135, 164, 205), false);
+                  LinearLayout.LayoutParams subLp = new LinearLayout.LayoutParams(
+                      -1, -2);
+                  subLp.topMargin = 6;
+                  page.addView(subtitle, subLp);
+
+                  LinearLayout hero = new LinearLayout(this);
+                  hero.setOrientation(LinearLayout.VERTICAL);
+                  hero.setPadding(20, 22, 20, 22);
+                  hero.setBackground(shape(Color.rgb(27, 43, 70), 22));
+                  LinearLayout.LayoutParams heroLp = new LinearLayout.LayoutParams(-1, -2);
+                  heroLp.topMargin = 26;
+                  page.addView(hero, heroLp);
+
+                  hero.addView(text("欢迎使用", 14, Color.rgb(150, 190, 245), true));
+                  TextView headline = text("账号登录助手", 24, Color.WHITE, true);
+                  LinearLayout.LayoutParams hLp = new LinearLayout.LayoutParams(-1, -2);
+                  hLp.topMargin = 8;
+                  hero.addView(headline, hLp);
+                  TextView desc = text("请通过游戏或平台官方提供的授权方式登录。请勿向他人提供密码或验证码。",
+                      14, Color.rgb(210, 220, 238), false);
+                  desc.setLineSpacing(5, 1f);
+                  LinearLayout.LayoutParams dLp = new LinearLayout.LayoutParams(-1, -2);
+                  dLp.topMargin = 12;
+                  hero.addView(desc, dLp);
+
+                  TextView statusTitle = text("设备状态", 18, Color.WHITE, true);
+                  LinearLayout.LayoutParams stLp = new LinearLayout.LayoutParams(-1, -2);
+                  stLp.topMargin = 26;
+                  page.addView(statusTitle, stLp);
+
+                  LinearLayout status = new LinearLayout(this);
+                  status.setOrientation(LinearLayout.VERTICAL);
+                  status.setPadding(18, 18, 18, 18);
+                  status.setBackground(shape(Color.rgb(25, 34, 52), 18));
+                  LinearLayout.LayoutParams statusLp = new LinearLayout.LayoutParams(-1, -2);
+                  statusLp.topMargin = 12;
+                  page.addView(status, statusLp);
+
+                  status.addView(text("Root 授权状态", 14,
+                      Color.rgb(160, 177, 203), false));
+                  rootValue = text("尚未检测", 20, Color.rgb(255, 205, 105), true);
+                  LinearLayout.LayoutParams rvLp = new LinearLayout.LayoutParams(-1, -2);
+                  rvLp.topMargin = 8;
+                  status.addView(rootValue, rvLp);
+
+                  Button check = makeButton("检测 Root 状态");
+                  LinearLayout.LayoutParams checkLp = new LinearLayout.LayoutParams(-1, -2);
+                  checkLp.topMargin = 14;
+                  status.addView(check, checkLp);
+                  check.setOnClickListener(v -> checkRoot());
+
+                  TextView loginTitle = text("登录服务", 18, Color.WHITE, true);
+                  LinearLayout.LayoutParams ltLp = new LinearLayout.LayoutParams(-1, -2);
+                  ltLp.topMargin = 26;
+                  page.addView(loginTitle, ltLp);
+
+                  Button official = makeButton("官方授权登录");
+                  LinearLayout.LayoutParams officialLp = new LinearLayout.LayoutParams(-1, -2);
+                  officialLp.topMargin = 12;
+                  page.addView(official, officialLp);
+                  official.setOnClickListener(v -> Toast.makeText(this,
+                      "当前版本尚未接入具体游戏的官方授权接口。",
+                      Toast.LENGTH_LONG).show());
+
+                  TextView note = text("说明：此版本提供界面与 Root 状态检测。官方登录接口需由对应游戏或平台提供并完成授权接入。",
+                      12, Color.rgb(145, 160, 185), false);
+                  note.setLineSpacing(4, 1f);
+                  LinearLayout.LayoutParams noteLp = new LinearLayout.LayoutParams(-1, -2);
+                  noteLp.topMargin = 18;
+                  page.addView(note, noteLp);
+
+                  TextView version = text("版本 2.0  ·  极品上号器", 12,
+                      Color.rgb(100, 120, 150), false);
+                  version.setGravity(Gravity.CENTER);
+                  LinearLayout.LayoutParams vLp = new LinearLayout.LayoutParams(-1, -2);
+                  vLp.topMargin = 30;
+                  page.addView(version, vLp);
+
+                  setContentView(scroll);
+              }
+
+              private void checkRoot() {
+                  rootValue.setText("正在检测…");
+                  new Thread(() -> {
+                      String result;
+                      int color;
+                      try {
+                          Process p = Runtime.getRuntime().exec(
+                              new String[]{"su", "-c", "id"});
+                          int code = p.waitFor();
+                          if (code == 0) {
+                              result = "已获得 Root 授权";
+                              color = Color.rgb(100, 220, 155);
+                          } else {
+                              result = "未获得 Root 授权";
+                              color = Color.rgb(255, 150, 130);
                           }
-                          final String msg = result;
-                          runOnUiThread(() -> info.setText(msg));
-                      }).start();
-                  });
-
-          
-
-                  layout.addView(title);
-                  layout.addView(info);
-                  layout.addView(button);
-                  setContentView(layout);
+                      } catch (Exception e) {
+                          result = "检测失败，请检查 KSU 授权";
+                          color = Color.rgb(255, 150, 130);
+                      }
+                      final String msg = result;
+                      final int c = color;
+                      runOnUiThread(() -> {
+                          rootValue.setText(msg);
+                          rootValue.setTextColor(c);
+                      });
+                  }).start();
               }
           }
           EOF
@@ -166,5 +270,5 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: JipinShanghaoqi-APK
+          name: JipinShanghaoqi-APK-v2
           path: app/build/outputs/apk/debug/app-debug.apk
