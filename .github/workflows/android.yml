@@ -22,9 +22,14 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
 
       - name: Create Android project
+        shell: bash
         run: |
+          set -e
+
           mkdir -p app/src/main/java/com/jipin/shanghaoqi
 
           cat > settings.gradle <<'EOF'
@@ -42,7 +47,7 @@ jobs:
                   mavenCentral()
               }
           }
-          rootProject.name = "JipinShanghaoqi"
+          rootProject.name = 'JipinShanghaoqi'
           include ':app'
           EOF
 
@@ -109,7 +114,7 @@ jobs:
                   layout.setOrientation(LinearLayout.VERTICAL);
                   layout.setGravity(Gravity.CENTER);
                   layout.setPadding(32, 32, 32, 32);
-                  layout.setBackgroundColor(Color.rgb(245,245,245));
+                  layout.setBackgroundColor(Color.rgb(245, 245, 245));
 
                   TextView title = new TextView(this);
                   title.setText("极品上号器");
@@ -118,11 +123,11 @@ jobs:
                   title.setGravity(Gravity.CENTER);
 
                   TextView info = new TextView(this);
-                  info.setText("官方授权登录工具\\n\\n请使用游戏官方提供的扫码或授权登录方式。");
+                  info.setText("官方授权登录工具\n\n请使用游戏官方提供的扫码或授权登录方式。");
                   info.setTextSize(16);
                   info.setTextColor(Color.DKGRAY);
                   info.setGravity(Gravity.CENTER);
-                  info.setPadding(0,40,0,40);
+                  info.setPadding(0, 40, 0, 40);
 
                   Button button = new Button(this);
                   button.setText("检测 Root 状态");
@@ -130,9 +135,13 @@ jobs:
                       new Thread(() -> {
                           String result;
                           try {
-                              Process p = Runtime.getRuntime().exec(new String[]{"su", "-c", "id"});
+                              Process p = Runtime.getRuntime().exec(
+                                  new String[]{"su", "-c", "id"}
+                              );
                               int code = p.waitFor();
-                              result = code == 0 ? "检测到 Root 授权" : "未获得 Root 授权";
+                              result = code == 0
+                                  ? "检测到 Root 授权"
+                                  : "未获得 Root 授权";
                           } catch (Exception e) {
                               result = "未检测到 Root 或无法执行检测";
                           }
@@ -141,19 +150,4 @@ jobs:
                       }).start();
                   });
 
-                  layout.addView(title);
-                  layout.addView(info);
-                  layout.addView(button);
-                  setContentView(layout);
-              }
-          }
-                    EOF
-
-      - name: Build APK
-        run: gradle assembleDebug
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: JipinShanghaoqi-APK
-          path: app/build/outputs/apk/debug/app-debug.apk
+          
